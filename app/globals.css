@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f2f4f6;
+  --surface: #ffffff;
+  --foreground: #191f28;
+  --foreground-secondary: #4e5968;
+  --foreground-tertiary: #8b95a1;
+  --border: #e5e8eb;
+  --primary: #3182f6;
+  --primary-hover: #1b64da;
+  --primary-soft: #eaf2ff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-foreground-tertiary: var(--foreground-tertiary);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --font-sans: var(--font-pretendard);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-pretendard), "Pretendard", -apple-system, BlinkMacSystemFont,
+    "Malgun Gothic", sans-serif;
+}
