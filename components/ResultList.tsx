@@ -1,4 +1,5 @@
 import type { KakaoPlace } from "@/lib/kakao";
+import type { ToggleSaveResult } from "@/hooks/useSavedPlaces";
 import PlaceCard from "./PlaceCard";
 
 interface ResultListProps {
@@ -6,6 +7,8 @@ interface ResultListProps {
   isLoading: boolean;
   message: string | null;
   hasSearched: boolean;
+  savedIds: Set<string>;
+  onToggleSave: (place: KakaoPlace) => Promise<ToggleSaveResult>;
 }
 
 export default function ResultList({
@@ -13,6 +16,8 @@ export default function ResultList({
   isLoading,
   message,
   hasSearched,
+  savedIds,
+  onToggleSave,
 }: ResultListProps) {
   if (isLoading) {
     return (
@@ -38,7 +43,12 @@ export default function ResultList({
   return (
     <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {places.map((place) => (
-        <PlaceCard key={place.id} place={place} />
+        <PlaceCard
+          key={place.id}
+          place={place}
+          isSaved={savedIds.has(place.id)}
+          onToggleSave={onToggleSave}
+        />
       ))}
     </div>
   );

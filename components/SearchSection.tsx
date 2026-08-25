@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { KakaoPlace } from "@/lib/kakao";
+import { useSavedPlaces } from "@/hooks/useSavedPlaces";
 import SearchBar from "./SearchBar";
 import ResultList from "./ResultList";
 
@@ -15,6 +16,7 @@ export default function SearchSection() {
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const { savedIds, toggleSave } = useSavedPlaces();
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
@@ -43,6 +45,8 @@ export default function SearchSection() {
           isLoading={isLoading}
           message={message}
           hasSearched={hasSearched}
+          savedIds={savedIds}
+          onToggleSave={toggleSave}
         />
       </div>
     </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthModalProvider } from "@/components/AuthModalProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,7 +19,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         className="min-h-full flex flex-col"
         style={{ ["--font-pretendard" as string]: "'PretendardVariable'" }}
       >
-        {children}
+        <AuthModalProvider>{children}</AuthModalProvider>
       </body>
     </html>
   );

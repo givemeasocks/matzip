@@ -2,14 +2,30 @@
 
 import { useState } from "react";
 import type { KakaoPlace } from "@/lib/kakao";
+import type { ToggleSaveResult } from "@/hooks/useSavedPlaces";
+import { useAuthModal } from "./AuthModalProvider";
 import ReviewPanel from "./ReviewPanel";
 
 interface PlaceCardProps {
   place: KakaoPlace;
+  isSaved: boolean;
+  onToggleSave: (place: KakaoPlace) => Promise<ToggleSaveResult>;
 }
 
-export default function PlaceCard({ place }: PlaceCardProps) {
+export default function PlaceCard({ place, isSaved, onToggleSave }: PlaceCardProps) {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [showLoginHint, setShowLoginHint] = useState(false);
+  const { openAuthModal } = useAuthModal();
+
+  const handleToggleSave = async (event: React.MouseEvent) => {
+    event.stopPropagation();
+    const result = await onToggleSave(place);
+    if (result.requiresLogin) {
+      setShowLoginHint(true);
+      openAuthModal();
+      setTimeout(() => setShowLoginHint(false), 2500);
+    }
+  };
 
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-shadow hover:shadow-md">
@@ -33,28 +49,40 @@ export default function PlaceCard({ place }: PlaceCardProps) {
             </span>
             <h3 className="text-lg font-bold text-foreground">{place.name}</h3>
           </div>
-          {/* 담기 버튼 — 모양만, 기능은 로그인/담기 Phase에서 연결 */}
-          <span
-            role="button"
-            aria-label="담기"
-            onClick={(event) => event.stopPropagation()}
-            className="shrink-0 rounded-full border border-border p-2 text-foreground-tertiary transition-colors hover:border-primary hover:text-primary"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              className="h-5 w-5"
+
+          <div className="relative shrink-0">
+            <span
+              role="button"
+              aria-label={isSaved ? "담기 취소" : "담기"}
+              onClick={handleToggleSave}
+              className={
+                isSaved
+                  ? "block rounded-full border border-primary bg-primary p-2 text-white transition-colors"
+                  : "block rounded-full border border-border p-2 text-foreground-tertiary transition-colors hover:border-primary hover:text-primary"
+              }
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1Z"
-              />
-            </svg>
-          </span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill={isSaved ? "currentColor" : "none"}
+                stroke="currentColor"
+                strokeWidth={2}
+                className="h-5 w-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1Z"
+                />
+              </svg>
+            </span>
+
+            {showLoginHint && (
+              <div className="absolute right-0 top-11 z-10 w-max rounded-lg bg-foreground px-3 py-2 text-xs font-medium text-white shadow-lg">
+                로그인하면 담을 수 있어요
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col gap-1 text-sm text-foreground-secondary">
