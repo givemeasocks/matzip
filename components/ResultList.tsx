@@ -9,6 +9,7 @@ interface ResultListProps {
   hasSearched: boolean;
   savedIds: Set<string>;
   onToggleSave: (place: KakaoPlace) => Promise<ToggleSaveResult>;
+  onSaveMemo: (placeId: string, memo: string) => Promise<void>;
 }
 
 export default function ResultList({
@@ -18,6 +19,7 @@ export default function ResultList({
   hasSearched,
   savedIds,
   onToggleSave,
+  onSaveMemo,
 }: ResultListProps) {
   if (isLoading) {
     return (
@@ -48,6 +50,7 @@ export default function ResultList({
           place={place}
           isSaved={savedIds.has(place.id)}
           onToggleSave={onToggleSave}
+          onSaveMemo={onSaveMemo}
         />
       ))}
     </div>

@@ -7,6 +7,7 @@ import type { KakaoPlace } from "@/lib/kakao";
 
 export interface ToggleSaveResult {
   requiresLogin: boolean;
+  saved: boolean;
 }
 
 const EMPTY_SET: Set<string> = new Set();
@@ -36,7 +37,7 @@ export function useSavedPlaces() {
   const toggleSave = useCallback(
     async (place: KakaoPlace): Promise<ToggleSaveResult> => {
       if (!user) {
-        return { requiresLogin: true };
+        return { requiresLogin: true, saved: false };
       }
 
       const isSaved = savedIds.has(place.id);
@@ -78,10 +79,18 @@ export function useSavedPlaces() {
         }
       }
 
-      return { requiresLogin: false };
+      return { requiresLogin: false, saved: !isSaved };
     },
     [user, savedIds]
   );
 
-  return { savedIds: user ? savedIds : EMPTY_SET, toggleSave };
+  const saveMemo = useCallback(async (placeId: string, memo: string) => {
+    const trimmed = memo.trim();
+    await supabase
+      .from("saved_places")
+      .update({ memo: trimmed || null })
+      .eq("place_id", placeId);
+  }, []);
+
+  return { savedIds: user ? savedIds : EMPTY_SET, toggleSave, saveMemo };
 }

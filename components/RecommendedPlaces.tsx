@@ -13,7 +13,7 @@ interface SearchResponse {
 
 export default function RecommendedPlaces() {
   const { user } = useUser();
-  const { savedIds, toggleSave } = useSavedPlaces();
+  const { savedIds, toggleSave, saveMemo } = useSavedPlaces();
   const [category, setCategory] = useState<string | null>(null);
   const [places, setPlaces] = useState<KakaoPlace[]>([]);
 
@@ -93,6 +93,7 @@ export default function RecommendedPlaces() {
             place={place}
             isSaved={savedIds.has(place.id)}
             onToggleSave={toggleSave}
+            onSaveMemo={saveMemo}
           />
         ))}
       </div>

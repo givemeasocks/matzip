@@ -16,7 +16,7 @@ export default function SearchSection() {
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const { savedIds, toggleSave } = useSavedPlaces();
+  const { savedIds, toggleSave, saveMemo } = useSavedPlaces();
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
@@ -47,6 +47,7 @@ export default function SearchSection() {
           hasSearched={hasSearched}
           savedIds={savedIds}
           onToggleSave={toggleSave}
+          onSaveMemo={saveMemo}
         />
       </div>
     </div>

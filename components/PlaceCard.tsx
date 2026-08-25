@@ -10,11 +10,14 @@ interface PlaceCardProps {
   place: KakaoPlace;
   isSaved: boolean;
   onToggleSave: (place: KakaoPlace) => Promise<ToggleSaveResult>;
+  onSaveMemo: (placeId: string, memo: string) => Promise<void>;
 }
 
-export default function PlaceCard({ place, isSaved, onToggleSave }: PlaceCardProps) {
+export default function PlaceCard({ place, isSaved, onToggleSave, onSaveMemo }: PlaceCardProps) {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [showLoginHint, setShowLoginHint] = useState(false);
+  const [showMemoComposer, setShowMemoComposer] = useState(false);
+  const [memoDraft, setMemoDraft] = useState("");
   const { openAuthModal } = useAuthModal();
 
   const handleToggleSave = async (event: React.MouseEvent) => {
@@ -24,7 +27,20 @@ export default function PlaceCard({ place, isSaved, onToggleSave }: PlaceCardPro
       setShowLoginHint(true);
       openAuthModal();
       setTimeout(() => setShowLoginHint(false), 2500);
+      return;
     }
+    if (result.saved) {
+      setMemoDraft("");
+      setShowMemoComposer(true);
+    } else {
+      setShowMemoComposer(false);
+    }
+  };
+
+  const handleSaveMemoDraft = async (event: React.MouseEvent) => {
+    event.stopPropagation();
+    await onSaveMemo(place.id, memoDraft);
+    setShowMemoComposer(false);
   };
 
   return (
@@ -80,6 +96,43 @@ export default function PlaceCard({ place, isSaved, onToggleSave }: PlaceCardPro
             {showLoginHint && (
               <div className="absolute right-0 top-12 z-10 w-max rounded-lg bg-foreground px-3 py-2 text-xs font-medium text-white shadow-lg">
                 로그인하면 담을 수 있어요
+              </div>
+            )}
+
+            {showMemoComposer && (
+              <div
+                onClick={(event) => event.stopPropagation()}
+                className="absolute right-0 top-12 z-10 w-56 rounded-xl border border-border bg-surface p-3 shadow-lg"
+              >
+                <p className="mb-2 text-xs font-semibold text-foreground-secondary">
+                  담았어요! 메모를 남겨볼까요?
+                </p>
+                <textarea
+                  autoFocus
+                  value={memoDraft}
+                  onChange={(event) => setMemoDraft(event.target.value)}
+                  placeholder="예: 회식 장소, 친구 추천"
+                  className="mb-2 h-16 w-full resize-none rounded-lg border border-border px-2 py-1.5 text-xs text-foreground outline-none focus:border-primary"
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setShowMemoComposer(false);
+                    }}
+                    className="text-xs font-semibold text-foreground-tertiary hover:text-foreground"
+                  >
+                    닫기
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveMemoDraft}
+                    className="rounded-md bg-primary px-2.5 py-1 text-xs font-semibold text-white hover:bg-primary-hover"
+                  >
+                    저장
+                  </button>
+                </div>
               </div>
             )}
           </div>
