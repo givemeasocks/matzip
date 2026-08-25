@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>메모</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #ffffff;
+      color: #37352f;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", Helvetica, Arial, sans-serif;
+    }
+
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 80px 24px 120px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0 0 32px;
+      color: #37352f;
+    }
+
+    .composer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 88px;
+      resize: vertical;
+      border: 1px solid #e9e9e7;
+      border-radius: 6px;
+      padding: 12px 14px;
+      font: inherit;
+      font-size: 16px;
+      color: #37352f;
+      outline: none;
+      transition: border-color 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    textarea::placeholder {
+      color: #9b9a97;
+    }
+
+    textarea:focus {
+      border-color: #2383e2;
+      box-shadow: 0 0 0 1px #2383e2;
+    }
+
+    .btn {
+      font: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.12s ease, color 0.12s ease;
+    }
+
+    .btn-primary {
+      align-self: flex-end;
+      background: #2383e2;
+      color: #ffffff;
+      padding: 8px 16px;
+    }
+
+    .btn-primary:hover {
+      background: #1a73cf;
+    }
+
+    .btn-primary:disabled {
+      background: #b8d8f8;
+      cursor: not-allowed;
+    }
+
+    .btn-text {
+      background: transparent;
+      color: #9b9a97;
+      padding: 4px 8px;
+    }
+
+    .btn-text:hover {
+      color: #37352f;
+      background: #efeeec;
+    }
+
+    .btn-text.danger:hover {
+      color: #eb5757;
+      background: #fdecec;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .memo-card {
+      border: 1px solid #e9e9e7;
+      border-radius: 4px;
+      padding: 12px 14px;
+      transition: background-color 0.12s ease;
+    }
+
+    .memo-card:hover {
+      background: #f7f6f3;
+    }
+
+    .memo-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .memo-content {
+      font-size: 16px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      flex: 1;
+    }
+
+    .memo-actions {
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.12s ease;
+      flex-shrink: 0;
+    }
+
+    .memo-card:hover .memo-actions {
+      opacity: 1;
+    }
+
+    .memo-time {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #787774;
+    }
+
+    .edit-textarea {
+      width: 100%;
+      min-height: 72px;
+      border: 1px solid #2383e2;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font: inherit;
+      font-size: 16px;
+      color: #37352f;
+      outline: none;
+      box-shadow: 0 0 0 1px #2383e2;
+    }
+
+    .edit-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px 0;
+      color: #9b9a97;
+      font-size: 14px;
+    }
+
+    .status {
+      font-size: 13px;
+      color: #9b9a97;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>메모</h1>
+
+    <div class="composer">
+      <textarea id="new-memo-input" placeholder="메모를 입력하세요..."></textarea>
+      <button id="add-btn" class="btn btn-primary" type="button">추가</button>
+    </div>
+
+    <p id="status" class="status"></p>
+    <div id="list" class="list"></div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://xhmqefsdkyuybhnfvzia.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_-jOYr0XJDdGa9VneHt_fcA_ouY8G-bA";
+
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const listEl = document.getElementById("list");
+    const statusEl = document.getElementById("status");
+    const newMemoInput = document.getElementById("new-memo-input");
+    const addBtn = document.getElementById("add-btn");
+
+    function formatTime(isoString) {
+      const date = new Date(isoString);
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    function renderMemos(memos) {
+      listEl.innerHTML = "";
+
+      if (memos.length === 0) {
+        listEl.innerHTML = '<p class="empty">아직 작성한 메모가 없어요</p>';
+        return;
+      }
+
+      for (const memo of memos) {
+        const card = document.createElement("div");
+        card.className = "memo-card";
+        card.dataset.id = memo.id;
+
+        card.innerHTML = `
+          <div class="memo-top">
+            <div class="memo-content">${escapeHtml(memo.content)}</div>
+            <div class="memo-actions">
+              <button type="button" class="btn btn-text edit-btn">수정</button>
+              <button type="button" class="btn btn-text danger delete-btn">삭제</button>
+            </div>
+          </div>
+          <div class="memo-time">${formatTime(memo.created_at)}</div>
+        `;
+
+        card.querySelector(".edit-btn").addEventListener("click", () => startEdit(card, memo));
+        card.querySelector(".delete-btn").addEventListener("click", () => deleteMemo(memo.id));
+
+        listEl.appendChild(card);
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function startEdit(card, memo) {
+      card.innerHTML = `
+        <textarea class="edit-textarea">${memo.content}</textarea>
+        <div class="edit-actions">
+          <button type="button" class="btn btn-text cancel-btn">취소</button>
+          <button type="button" class="btn btn-primary save-btn">저장</button>
+        </div>
+      `;
+
+      const textarea = card.querySelector(".edit-textarea");
+      textarea.focus();
+
+      card.querySelector(".cancel-btn").addEventListener("click", loadMemos);
+      card.querySelector(".save-btn").addEventListener("click", () => saveEdit(memo.id, textarea.value));
+    }
+
+    async function saveEdit(id, content) {
+      const trimmed = content.trim();
+      if (!trimmed) return;
+
+      const { error } = await client.from("memos").update({ content: trimmed }).eq("id", id);
+      if (error) {
+        setStatus(`수정 실패: ${error.message}`);
+        return;
+      }
+      await loadMemos();
+    }
+
+    async function deleteMemo(id) {
+      const { error } = await client.from("memos").delete().eq("id", id);
+      if (error) {
+        setStatus(`삭제 실패: ${error.message}`);
+        return;
+      }
+      await loadMemos();
+    }
+
+    async function addMemo() {
+      const content = newMemoInput.value.trim();
+      if (!content) return;
+
+      addBtn.disabled = true;
+      const { error } = await client.from("memos").insert({ content });
+      addBtn.disabled = false;
+
+      if (error) {
+        setStatus(`추가 실패: ${error.message}`);
+        return;
+      }
+
+      newMemoInput.value = "";
+      await loadMemos();
+    }
+
+    function setStatus(text) {
+      statusEl.textContent = text;
+    }
+
+    async function loadMemos() {
+      const { data, error } = await client
+        .from("memos")
+        .select("id, content, created_at")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        setStatus(`불러오기 실패: ${error.message}`);
+        return;
+      }
+
+      setStatus("");
+      renderMemos(data);
+    }
+
+    addBtn.addEventListener("click", addMemo);
+    newMemoInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+        addMemo();
+      }
+    });
+
+    loadMemos();
+  </script>
+</body>
+</html>
