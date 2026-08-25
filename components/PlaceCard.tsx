@@ -57,8 +57,8 @@ export default function PlaceCard({ place, isSaved, onToggleSave }: PlaceCardPro
               onClick={handleToggleSave}
               className={
                 isSaved
-                  ? "block rounded-full border border-primary bg-primary p-2 text-white transition-colors"
-                  : "block rounded-full border border-border p-2 text-foreground-tertiary transition-colors hover:border-primary hover:text-primary"
+                  ? "flex h-11 w-11 items-center justify-center rounded-full border border-primary bg-primary text-white transition-colors"
+                  : "flex h-11 w-11 items-center justify-center rounded-full border border-border text-foreground-tertiary transition-colors hover:border-primary hover:text-primary"
               }
             >
               <svg
@@ -78,7 +78,7 @@ export default function PlaceCard({ place, isSaved, onToggleSave }: PlaceCardPro
             </span>
 
             {showLoginHint && (
-              <div className="absolute right-0 top-11 z-10 w-max rounded-lg bg-foreground px-3 py-2 text-xs font-medium text-white shadow-lg">
+              <div className="absolute right-0 top-12 z-10 w-max rounded-lg bg-foreground px-3 py-2 text-xs font-medium text-white shadow-lg">
                 로그인하면 담을 수 있어요
               </div>
             )}

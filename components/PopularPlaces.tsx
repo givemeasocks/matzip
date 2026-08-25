@@ -32,7 +32,7 @@ export default function PopularPlaces() {
   }
 
   return (
-    <section className="flex w-full max-w-5xl flex-col gap-4">
+    <section id="popular" className="flex w-full max-w-5xl scroll-mt-6 flex-col gap-4">
       <h2 className="text-xl font-bold text-foreground">지금 인기 맛집 Top 5</h2>
       <div className="flex flex-col gap-1 rounded-2xl border border-border bg-surface p-2 shadow-sm">
         {places.map((place, index) => (

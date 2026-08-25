@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AuthModalProvider } from "@/components/AuthModalProvider";
+import MobileTabBar from "@/components/MobileTabBar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,7 +20,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         className="min-h-full flex flex-col"
         style={{ ["--font-pretendard" as string]: "'PretendardVariable'" }}
       >
-        <AuthModalProvider>{children}</AuthModalProvider>
+        <AuthModalProvider>
+          {children}
+          <MobileTabBar />
+        </AuthModalProvider>
       </body>
     </html>
   );

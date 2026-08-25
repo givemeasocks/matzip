@@ -79,7 +79,7 @@ export default function RecommendedPlaces() {
   }
 
   return (
-    <section className="flex w-full max-w-5xl flex-col gap-4">
+    <section id="recommended" className="flex w-full max-w-5xl scroll-mt-6 flex-col gap-4">
       <div className="flex flex-col gap-1">
         <h2 className="text-xl font-bold text-foreground">나를 위한 추천</h2>
         <p className="text-sm text-foreground-secondary">
