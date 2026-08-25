@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "맛집 | 서울 맛집 검색",
+  title: "yumview | 서울 맛집 검색",
   description: "서울 맛집을 검색하고 담아두는 서비스",
 };
 
