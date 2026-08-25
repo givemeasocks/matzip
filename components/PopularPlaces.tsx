@@ -36,8 +36,11 @@ export default function PopularPlaces() {
       <h2 className="text-xl font-bold text-foreground">지금 인기 맛집 Top 5</h2>
       <div className="flex flex-col gap-1 rounded-2xl border border-border bg-surface p-2 shadow-sm">
         {places.map((place, index) => (
-          <div
+          <a
             key={place.place_id}
+            href={`https://map.kakao.com/?q=${encodeURIComponent(place.place_name)}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-background"
           >
             <span
@@ -51,7 +54,7 @@ export default function PopularPlaces() {
             </span>
             <span className="flex-1 font-semibold text-foreground">{place.place_name}</span>
             <span className="text-sm text-foreground-tertiary">{place.save_count}번 담김</span>
-          </div>
+          </a>
         ))}
       </div>
     </section>

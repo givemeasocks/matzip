@@ -11,6 +11,7 @@ interface SavedPlaceRow {
   place_name: string;
   category: string | null;
   address: string | null;
+  memo: string | null;
   created_at: string;
 }
 
@@ -37,7 +38,7 @@ export default function MyPageContent() {
 
     supabase
       .from("saved_places")
-      .select("id, place_name, category, address, created_at")
+      .select("id, place_name, category, address, memo, created_at")
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         if (cancelled) return;
@@ -52,6 +53,26 @@ export default function MyPageContent() {
   const handleDelete = async (id: string) => {
     setPlaces((prev) => prev?.filter((place) => place.id !== id) ?? null);
     await supabase.from("saved_places").delete().eq("id", id);
+  };
+
+  const handleSaveMemo = async (id: string, memo: string) => {
+    const trimmed = memo.trim();
+    const previousMemo = places?.find((place) => place.id === id)?.memo ?? null;
+
+    setPlaces((prev) =>
+      prev ? prev.map((place) => (place.id === id ? { ...place, memo: trimmed || null } : place)) : prev
+    );
+
+    const { error } = await supabase
+      .from("saved_places")
+      .update({ memo: trimmed || null })
+      .eq("id", id);
+
+    if (error) {
+      setPlaces((prev) =>
+        prev ? prev.map((place) => (place.id === id ? { ...place, memo: previousMemo } : place)) : prev
+      );
+    }
   };
 
   if (isUserLoading) {
@@ -98,49 +119,120 @@ export default function MyPageContent() {
   return (
     <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {places.map((place) => (
-        <div
+        <SavedPlaceCard
           key={place.id}
-          className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5 shadow-sm"
+          place={place}
+          onDelete={handleDelete}
+          onSaveMemo={handleSaveMemo}
+        />
+      ))}
+    </div>
+  );
+}
+
+interface SavedPlaceCardProps {
+  place: SavedPlaceRow;
+  onDelete: (id: string) => void;
+  onSaveMemo: (id: string, memo: string) => void;
+}
+
+function SavedPlaceCard({ place, onDelete, onSaveMemo }: SavedPlaceCardProps) {
+  const [isEditingMemo, setIsEditingMemo] = useState(false);
+  const [draftMemo, setDraftMemo] = useState(place.memo ?? "");
+
+  const startEdit = () => {
+    setDraftMemo(place.memo ?? "");
+    setIsEditingMemo(true);
+  };
+
+  const save = () => {
+    onSaveMemo(place.id, draftMemo);
+    setIsEditingMemo(false);
+  };
+
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-col gap-1">
+          <span className="w-fit rounded-full bg-primary-soft px-2.5 py-1 text-xs font-medium text-primary">
+            {place.category || "맛집"}
+          </span>
+          <h3 className="text-lg font-bold text-foreground">{place.place_name}</h3>
+        </div>
+        <button
+          type="button"
+          aria-label="삭제"
+          onClick={() => onDelete(place.id)}
+          className="shrink-0 rounded-full border border-border p-2 text-foreground-tertiary transition-colors hover:border-rose-400 hover:text-rose-500"
         >
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex flex-col gap-1">
-              <span className="w-fit rounded-full bg-primary-soft px-2.5 py-1 text-xs font-medium text-primary">
-                {place.category || "맛집"}
-              </span>
-              <h3 className="text-lg font-bold text-foreground">{place.place_name}</h3>
-            </div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            className="h-4 w-4"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </div>
+
+      <p className="text-sm text-foreground-secondary">{place.address}</p>
+      <p className="text-xs text-foreground-tertiary">{formatDate(place.created_at)} 담음</p>
+
+      {isEditingMemo ? (
+        <div className="flex flex-col gap-2">
+          <textarea
+            autoFocus
+            value={draftMemo}
+            onChange={(event) => setDraftMemo(event.target.value)}
+            placeholder="이 가게에 대한 메모를 남겨보세요"
+            className="min-h-[64px] w-full rounded-xl border border-primary px-3 py-2 text-sm text-foreground outline-none"
+          />
+          <div className="flex justify-end gap-2">
             <button
               type="button"
-              aria-label="삭제"
-              onClick={() => handleDelete(place.id)}
-              className="shrink-0 rounded-full border border-border p-2 text-foreground-tertiary transition-colors hover:border-rose-400 hover:text-rose-500"
+              onClick={() => setIsEditingMemo(false)}
+              className="rounded-lg px-3 py-1.5 text-xs font-semibold text-foreground-tertiary hover:text-foreground"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                className="h-4 w-4"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6L6 18" />
-              </svg>
+              취소
+            </button>
+            <button
+              type="button"
+              onClick={save}
+              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-hover"
+            >
+              저장
             </button>
           </div>
-
-          <p className="text-sm text-foreground-secondary">{place.address}</p>
-          <p className="text-xs text-foreground-tertiary">{formatDate(place.created_at)} 담음</p>
-
-          <a
-            href={googleMapsLink(place.place_name, place.address)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 w-fit text-sm font-semibold text-primary hover:underline"
-          >
-            구글맵에서 보기 →
-          </a>
         </div>
-      ))}
+      ) : place.memo ? (
+        <button
+          type="button"
+          onClick={startEdit}
+          className="rounded-xl bg-background px-3 py-2 text-left text-sm text-foreground-secondary transition-colors hover:bg-primary-soft"
+        >
+          {place.memo}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={startEdit}
+          className="w-fit rounded-lg border border-dashed border-border px-3 py-1.5 text-xs font-medium text-foreground-tertiary transition-colors hover:border-primary hover:text-primary"
+        >
+          + 메모 추가
+        </button>
+      )}
+
+      <a
+        href={googleMapsLink(place.place_name, place.address)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-1 w-fit text-sm font-semibold text-primary hover:underline"
+      >
+        구글맵에서 보기 →
+      </a>
     </div>
   );
 }
