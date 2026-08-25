@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { GooglePlaceReviews } from "@/lib/google-places";
+import AnalysisPanel from "./AnalysisPanel";
 
 interface ReviewPanelProps {
   placeId: string;
@@ -127,6 +128,13 @@ export default function ReviewPanel({ placeId, placeName, lat, lng }: ReviewPane
         >
           구글 맵에서 전체 리뷰 보기 →
         </a>
+      )}
+
+      {place.reviews.length > 0 && (
+        <div className="flex flex-col gap-3 border-t border-border pt-4">
+          <span className="text-sm font-bold text-foreground">AI 리뷰 분석</span>
+          <AnalysisPanel placeId={placeId} placeName={place.name} reviews={place.reviews} />
+        </div>
       )}
     </div>
   );
