@@ -1,4 +1,5 @@
 import AuthButton from "@/components/AuthButton";
+import MyPocketButton from "@/components/MyPocketButton";
 import SearchSection from "@/components/SearchSection";
 
 export default function Home() {
@@ -6,7 +7,10 @@ export default function Home() {
     <div className="flex flex-1 flex-col items-center bg-background px-4">
       <header className="flex w-full max-w-5xl items-center justify-between py-6">
         <span className="text-lg font-extrabold text-foreground">yumview</span>
-        <AuthButton />
+        <div className="flex items-center gap-5">
+          <MyPocketButton />
+          <AuthButton />
+        </div>
       </header>
 
       <main className="flex w-full max-w-5xl flex-1 flex-col items-center gap-10 py-10">
