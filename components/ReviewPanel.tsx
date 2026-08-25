@@ -113,7 +113,7 @@ export default function ReviewPanel({ placeId, placeName, lat, lng }: ReviewPane
                 <span className="text-xs text-foreground-tertiary">{review.relativeTime}</span>
               </div>
               <span className="text-xs text-primary">★ {review.rating}</span>
-              <p className="text-sm text-foreground-secondary">{review.text}</p>
+              <ReviewText text={review.text} />
             </li>
           ))}
         </ul>
@@ -135,6 +135,36 @@ export default function ReviewPanel({ placeId, placeName, lat, lng }: ReviewPane
           <span className="text-sm font-bold text-foreground">AI 리뷰 분석</span>
           <AnalysisPanel placeId={placeId} placeName={place.name} reviews={place.reviews} />
         </div>
+      )}
+    </div>
+  );
+}
+
+const LONG_REVIEW_THRESHOLD = 120;
+
+function ReviewText({ text }: { text: string }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const isLong = text.length > LONG_REVIEW_THRESHOLD;
+
+  return (
+    <div className="flex flex-col gap-1">
+      <p
+        className={
+          !isExpanded && isLong
+            ? "line-clamp-3 text-sm text-foreground-secondary"
+            : "text-sm text-foreground-secondary"
+        }
+      >
+        {text}
+      </p>
+      {isLong && (
+        <button
+          type="button"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          className="w-fit text-xs font-semibold text-primary hover:underline"
+        >
+          {isExpanded ? "접기" : "더보기"}
+        </button>
       )}
     </div>
   );
