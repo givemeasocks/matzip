@@ -1,5 +1,7 @@
 import AuthButton from "@/components/AuthButton";
 import MyPocketButton from "@/components/MyPocketButton";
+import PopularPlaces from "@/components/PopularPlaces";
+import RecommendedPlaces from "@/components/RecommendedPlaces";
 import SearchSection from "@/components/SearchSection";
 
 export default function Home() {
@@ -23,6 +25,8 @@ export default function Home() {
           </p>
         </div>
 
+        <PopularPlaces />
+        <RecommendedPlaces />
         <SearchSection />
       </main>
     </div>
