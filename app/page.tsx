@@ -1,10 +1,12 @@
+import AuthButton from "@/components/AuthButton";
 import SearchSection from "@/components/SearchSection";
 
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col items-center bg-background px-4">
-      <header className="flex w-full max-w-5xl items-center py-6">
+      <header className="flex w-full max-w-5xl items-center justify-between py-6">
         <span className="text-lg font-extrabold text-foreground">yumview</span>
+        <AuthButton />
       </header>
 
       <main className="flex w-full max-w-5xl flex-1 flex-col items-center gap-10 py-10">
